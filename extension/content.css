@@ -1,0 +1,44 @@
+.brain-sync-archive-btn {
+  position: fixed;
+  bottom: 120px;
+  right: 40px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 24px;
+  font-family: "Inter", -apple-system, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+  cursor: pointer;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brain-sync-archive-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+}
+
+.brain-sync-archive-btn:active {
+  transform: translateY(0);
+}
+
+.brain-sync-archive-btn.loading {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.brain-sync-archive-btn.success {
+  background: #10b981;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+.brain-sync-archive-btn.error {
+  background: #ef4444;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
