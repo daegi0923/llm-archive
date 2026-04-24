@@ -19,6 +19,7 @@ function extractConversation() {
   
   if (elements.length > 0) {
     elements.forEach(el => {
+      console.log(el.innerText);
       conversationContent += el.innerText + "\n\n";
     });
   } else {

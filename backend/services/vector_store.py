@@ -5,14 +5,15 @@ import google.generativeai as genai
 from core.config import settings
 
 # Text embedding model for Gemini
-embedding_model = 'models/text-embedding-004'
+embedding_model = 'models/gemini-embedding-001'
 
 def get_embedding(text: str) -> list[float]:
     genai.configure(api_key=settings.GEMINI_API_KEY)
     result = genai.embed_content(
         model=embedding_model,
         content=text,
-        task_type="retrieval_document"
+        task_type="retrieval_document",
+        output_dimensionality=768
     )
     return result['embedding']
 
