@@ -1,14 +1,17 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from models.conversation import Conversation
 from schemas.conversation import ConversationCreate
 
-def get_conversation(db: Session, conversation_id: str):
-    return db.query(Conversation).filter(Conversation.conversation_id == conversation_id).first()
+async def get_conversation(db: AsyncSession, conversation_id: str):
+    result = await db.execute(select(Conversation).filter(Conversation.conversation_id == conversation_id))
+    return result.scalars().first()
 
-def get_conversations(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Conversation).offset(skip).limit(limit).all()
+async def get_conversations(db: AsyncSession, skip: int = 0, limit: int = 100):
+    result = await db.execute(select(Conversation).offset(skip).limit(limit))
+    return result.scalars().all()
 
-def create_conversation(db: Session, conversation: ConversationCreate):
+async def create_conversation(db: AsyncSession, conversation: ConversationCreate):
     db_conversation = Conversation(
         conversation_id=conversation.conversation_id,
         title=conversation.title,
@@ -16,6 +19,6 @@ def create_conversation(db: Session, conversation: ConversationCreate):
         content=conversation.content
     )
     db.add(db_conversation)
-    db.commit()
-    db.refresh(db_conversation)
+    await db.commit()
+    await db.refresh(db_conversation)
     return db_conversation

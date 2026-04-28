@@ -1,13 +1,11 @@
-from typing import Generator
-from core.database import SessionLocal
+from typing import AsyncGenerator
+from sqlalchemy.ext.asyncio import AsyncSession
+from core.database import AsyncSessionLocal
 from core.qdrant import get_qdrant_client
 
-def get_db() -> Generator:
-    db = SessionLocal()
-    try:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as db:
         yield db
-    finally:
-        db.close()
 
 def get_qdrant():
     return get_qdrant_client()

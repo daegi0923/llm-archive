@@ -1,4 +1,4 @@
-from qdrant_client import QdrantClient
+from qdrant_client import AsyncQdrantClient
 from qdrant_client.http.models import Distance, VectorParams, PointStruct
 import uuid
 import google.generativeai as genai
@@ -7,9 +7,9 @@ from core.config import settings
 # Text embedding model for Gemini
 embedding_model = 'models/gemini-embedding-001'
 
-def get_embedding(text: str) -> list[float]:
+async def get_embedding(text: str) -> list[float]:
     genai.configure(api_key=settings.GEMINI_API_KEY)
-    result = genai.embed_content(
+    result = await genai.embed_content_async(
         model=embedding_model,
         content=text,
         task_type="retrieval_document",
@@ -17,18 +17,19 @@ def get_embedding(text: str) -> list[float]:
     )
     return result['embedding']
 
-def init_qdrant_collection(client: QdrantClient, collection_name: str = "conversations"):
-    collections = client.get_collections().collections
+async def init_qdrant_collection(client: AsyncQdrantClient, collection_name: str = "conversations"):
+    collections_response = await client.get_collections()
+    collections = collections_response.collections
     if not any(c.name == collection_name for c in collections):
-        client.create_collection(
+        await client.create_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(size=768, distance=Distance.COSINE),
         )
 
-def store_vectors(client: QdrantClient, conversation_id: str, text: str, collection_name: str = "conversations"):
-    embedding = get_embedding(text)
+async def store_vectors(client: AsyncQdrantClient, conversation_id: str, text: str, collection_name: str = "conversations"):
+    embedding = await get_embedding(text)
     point_id = str(uuid.uuid4())
-    client.upsert(
+    await client.upsert(
         collection_name=collection_name,
         points=[
             PointStruct(
@@ -42,9 +43,9 @@ def store_vectors(client: QdrantClient, conversation_id: str, text: str, collect
         ]
     )
 
-def search_similar(client: QdrantClient, query: str, limit: int = 3, collection_name: str = "conversations") -> list[dict]:
-    query_vector = get_embedding(query)
-    search_result = client.search(
+async def search_similar(client: AsyncQdrantClient, query: str, limit: int = 3, collection_name: str = "conversations") -> list[dict]:
+    query_vector = await get_embedding(query)
+    search_result = await client.search(
         collection_name=collection_name,
         query_vector=query_vector,
         limit=limit

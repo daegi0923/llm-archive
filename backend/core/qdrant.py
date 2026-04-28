@@ -1,5 +1,5 @@
-from qdrant_client import QdrantClient
+from qdrant_client import AsyncQdrantClient
 from core.config import settings
 
 def get_qdrant_client():
-    return QdrantClient(url=settings.QDRANT_URL)
+    return AsyncQdrantClient(url=settings.QDRANT_URL)
