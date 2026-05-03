@@ -10,4 +10,6 @@ class Conversation(Base):
     title = Column(String, index=True)
     url = Column(String)
     content = Column(Text)
+    summary = Column(Text)
+    keywords = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -7,9 +7,18 @@ class ConversationBase(BaseModel):
     title: str
     url: Optional[str] = None
     content: str
+    summary: Optional[str] = None
+    keywords: Optional[str] = None
 
 class ConversationCreate(ConversationBase):
     pass
+
+class ConversationUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    url: Optional[str] = None
+    summary: Optional[str] = None
+    keywords: Optional[str] = None
 
 class Conversation(ConversationBase):
     id: int

@@ -1,10 +1,7 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
     container_name: brain_sync_db
-    # restart: always
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -17,47 +14,80 @@ services:
   qdrant:
     image: qdrant/qdrant:latest
     container_name: brain_sync_qdrant
-    # restart: always
     ports:
       - "6333:6333"
       - "6334:6334"
     volumes:
       - qdrant_data:/qdrant/storage
 
-  backend:
+  # --- Backend Base (No Profile, No Depends) ---
+  backend-base:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: brain_sync_backend
-    # restart: always
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     env_file:
       - .env
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/brain_sync
       - QDRANT_URL=http://qdrant:6333
+
+  backend:
+    extends:
+      service: backend-base
+    container_name: brain_sync_backend
+    ports:
+      - "8000:8000"
     depends_on:
       - db
       - qdrant
+    profiles: ["prod"]
 
-  web:
+  backend-dev:
+    extends:
+      service: backend-base
+    container_name: brain_sync_backend_dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - db
+      - qdrant
+    profiles: ["dev"]
+
+  # --- Web Base (No Profile, No Depends) ---
+  web-base:
     build:
       context: ./web
       dockerfile: Dockerfile
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+
+  web:
+    extends:
+      service: web-base
     container_name: brain_sync_web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    profiles: ["prod"]
+
+  web-dev:
+    extends:
+      service: web-base
+    container_name: brain_sync_web_dev
     ports:
       - "3000:3000"
     volumes:
       - ./web:/app
-      - /app/node_modules
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - WATCHPACK_POLLING=true
     depends_on:
-      - backend
+      - backend-dev
+    profiles: ["dev"]
 
 volumes:
   postgres_data:
